@@ -105,50 +105,53 @@
         
     }
     
-    // Detect proximity of 2 sets of lat long values. Using the functions in latlon.js and geo.js 
-    
-    function detectProximity(lat1, lon1, lat2, lon2) {
-        var p1 = new LatLon(Geo.parseDMS(lat1), Geo.parseDMS(lon1));
-        var p2 = new LatLon(Geo.parseDMS(lat2), Geo.parseDMS(lon2));
-        var distance = (p1.distanceTo(p2))*1000;
-        alert(distance+' metres');
-        return distance;
-    }
-    
-    // Get proximity of pick-ups to players current position
-    
-    function pickupProximity() {
-        if ( t < pickUpLocations.length) {
-            var pos = pickUpLocations[t];
-            var proximity = detectProximity(pos[0], pos[1], latitude, longitude);
-            push.proximityArray(proximity);
-            alert("proximity values - "+proximityArray);
-        } else {
-            alert("proximity values - "+proximityArray);
-        }
-    }
-    
     //Count down function
     //
-    function countDownStart() {
-        countdown_number = 60;
-        countdown_trigger();
+    function startCountDown() {
+        countDownValue = 120;
+        countDownTrigger();
     }
     
-    function countdown_trigger() {
-        if(countdown_number > 0) {
-            countdown_number--;
-            document.getElementById('countdown').innerHTML = "Active Time Left: "+countdown_number;
-            if(countdown_number > 0) {
-                countdown = setTimeout('countdown_trigger()', 1000);
+    function countDownTrigger() {
+        if(countDownValue > 0) {
+            countDownValue--;
+            document.getElementById('countdown').innerHTML = "Active Time Left: "+countDownValue;
+            if(countDownValue > 0) {
+                countdown = setTimeout('countDownTrigger()', 1000);
             } else {
                 alert("Start heading back and collect your stars");
+                alert(pickUpLocations);
                 pickupProximity();
             }
         } 
             
         
     }
+    
+    // Detect proximity of 2 sets of lat long values. Using the functions in latlon.js and geo.js 
+    
+    function detectProximity(lat1, lon1, lat2, lon2) {
+        var p1 = new LatLon(Geo.parseDMS(lat1), Geo.parseDMS(lon1));
+        var p2 = new LatLon(Geo.parseDMS(lat2), Geo.parseDMS(lon2));
+        var distance = (p1.distanceTo(p2))*1000;
+        //alert(distance+' metres');
+        return distance;
+    }
+    
+    // Get proximity of pick-ups to players current position
+    
+    function pickupProximity() {
+        for (var l=0; l<pickUpLocations.length; l++) {
+            var pos = pickUpLocations[l];
+            alert("positions length: "+pickUpLocations.length+" values: "+pickUpLocations+"current Pos: "+latitude+" "+longitude);
+            var proximity = detectProximity(pos[0], pos[1], latitude, longitude);
+            alert("proximity single output - "+proximity);
+            push.proximityArray(proximity);
+            alert("proximity values - "+proximityArray);
+        }
+    }
+    
+    
     
 
     
