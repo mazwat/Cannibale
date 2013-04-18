@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <title>Cannibale</title>
+
+    <script type="text/javascript" charset="utf-8" src="cordova-2.4.0.js"></script>
+    <script type="text/javascript" src="js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="js/index.js"></script>
+    <script type="text/javascript" src="js/jquery.sparkline.min.js"></script>
+
+    <script type="text/javascript" src="js/TweenMax.min.js"></script>
+    <script type="text/javascript" src="js/CSSPlugin.min.js"></script>
+    <!--<script type="text/javascript" src="js/EasePack.min.js"></script>-->
+    <script type="text/javascript" charset="utf-8">
+        
+    // The watch id references the current `watchAcceleration`
+
+    var watchID = null;
+    
+    // init Variables
+    
+    var stepSample =[];
+    var xMax;
+    //var accelX;
+    //var accelY;
+    //var accelZ;
+    var stepTime;
+    var stepTimeSample =[];
+    var accelCombiSample =[]
+    //var count = 0;
+    var isChange = 0;
+    var mOldAccX = 0;
+    var mOldAccY = 0;
+    var mOldAccZ = 0;
+    var NumberOfSteps = 0;
+    var TotalSteps = 0;
+    var timer;
+    var timerSet = 0;
+
+    // Wait for Cordova to load
+    //
+    document.addEventListener("deviceready", onDeviceReady, false);
+    
+    Array.max = function( array ){
+        return Math.max.apply( Math, array );
+    };
+    
+
+    // Cordova is ready
+    //
+    function onDeviceReady() {
+        //document.getElementById('feedback').innerHTML = "device ready";
+        startWatch();
+    }
+
+    // Start watching the acceleration
+    //
+    function startWatch() {
+
+        // Update acceleration every .2 seconds
+        
+        var options = { frequency: 200 };
+        watchID = navigator.accelerometer.watchAcceleration(onSuccess, onError, options);
+    }
+
+    // Stop watching the acceleration
+    //
+    function stopWatch() {
+        if (watchID) {
+            navigator.accelerometer.clearWatch(watchID);
+            watchID = null;
+            
+        }
+    }
+
+    //onSuccess: Get a snapshot of the current acceleration and process X,Y and Z values into steps
+    //
+    function stepProcess(acceleration) {
+        var xx = acceleration.x;
+        var yy = acceleration.y;
+        var zz = acceleration.z;
+        //var time = acceleration.timestamp;
+        var disc = document.getElementById("accelerometer");
+        var accelCombi = (mOldAccX * xx) + (mOldAccY * yy) + (mOldAccZ * zz);
+        var a = Math.abs(Math.sqrt(mOldAccX * mOldAccX + mOldAccY * mOldAccY + mOldAccZ * mOldAccZ));
+        
+        var b = Math.abs(Math.sqrt(xx * xx + yy * yy + zz * zz));
+        
+        accelCombi /= (a * b);
+        // Get max and min values of accel with function
+        //sampleAccelCombi(accelCombi);
+        
+        if (accelCombi  <= 0.994 && accelCombi > 0.90) { // bounce calibration
+            clearTimeout(timer);
+            timerSet=0;
+            if (!isChange) {
+                isChange = 1;   
+                NumberOfSteps += 1;
+                TotalSteps += 1;
+                stepTime = time/1000;
+                // Disc pulses on screen, on step increase
+                //
+                TweenMax.to(disc, .1, {scale:1.2, repeat:1, yoyo:true});
+                
+                // Send step value everytime value exceeds threshold (multiple of 5)
+              
+                if (NumberOfSteps % 5 == 0) {
+                    sendSteps();
+                }
+            } else {
+                isChange = 0;
+            }
+            
+        //after non-movement for period of time set step value to 0
+        //
+        } else {
+            if (!timerSet) {
+                timerSet = 1;
+                timer = setTimeout(function(){
+                    NumberOfSteps=0;
+                    timerSet=0;
+                },3000);
+                
+            }
+        }
+               
+        mOldAccX = xx;
+        mOldAccY = yy; 
+        mOldAccZ = zz;
+    }
+    
+    // Send steps to network server
+    //
+    //function sendSteps() {
+    //    $.post("http://hackday.timestreams.wp.horizon.ac.uk/wp-content/plugins/timestreams/2/measurement/wp_16_16_ts_pedometer_254", {
+    //            value:NumberOfSteps
+    //            
+    //    },
+    //    
+    //    function(data,status){
+    //            document.getElementById('feedback').innerHTML = "Data: " + data + "\nStatus: " + status + " Upload value: " + NumberOfSteps;
+    //    });
+    //    
+    //}
+    
+    //Once App is started start calcualting steps
+    //
+    function onSuccess(acceleration) {
+        //count++;
+        var element = document.getElementById('accelerometer');
+        // Start processing steps
+        stepProcess(acceleration);
+        //Show steps on screen
+        element.innerHTML = NumberOfSteps;
+        document.getElementById('feedback').innerHTML = "Total Steps: " + TotalSteps;
+
+    }
+    
+    var sendInt = setInterval(sampleSteps,3000);
+    
+    //Sample accel values into array to find Max & Min values
+    
+    function sampleAccelCombi(accel) {
+        accelCombiSample.push(accel);
+        if (accelCombiSample.length <= 50) {
+            //Max and Min stuff
+        } else {   
+            accelCombi.shift();
+    }
+    
+    
+    //Sample steps to array to create bar graph
+    
+    function sampleSteps() {
+        if (stepSample.length <= 50) {
+            stepSample.push(NumberOfSteps);
+            //stepTimeSample.push(stepTime);
+            //
+            $(".sparkline").sparkline(stepSample, { type: 'bar', height:'70px',width:'225px',  barWidth: 3, zeroAxis: false, barColor:'#9E1F63'});
+            
+        } else {
+            //Remove first element of array at start to accommodate new entry
+            //
+            stepSample.shift();
+        }
+    }
+
+    // onError: Failed to get the acceleration
+    
+    function onError() {
+        alert('onError!');  
+    }   
+
+    </script>
+    </head>
+    <body>
+    <div class="app">
+    <h1>Ready to Play</h1>
+        <div id="deviceready" class="blink">
+                <p class="event listening">Waking Up</p>
+                <p class="event received">Start moving about</p>
+            </div>
+            <div id="accelerometer"><p class="acceltext">Waiting</p></div>
+            <span class="sparkline">Loading..</span>
+            <div id="feedback"></div>
+            
+    </div>
+
+    <script type="text/javascript">
+        app.initialize();
+    </script>
+
+    
+    </body>
+</html>
