@@ -64,37 +64,39 @@
                 
                 
                 // Send step value everytime value exceeds threshold (multiple of 5)
-              
-                if (NumberOfSteps % 20 == 0) {
-                    //sendSteps();
-                    Points += 1;
-                    pointsSample.push(1);
-                    // Add pickups to map
-                    pickUpType = 0;
-                    startPositionWatch();
-                    
-                }
-                if (NumberOfSteps % 55 == 0) {
-                    //sendSteps();
-                    Points += 50;
-                    pointsSample.push(2);
-                     // Add pickups to map
-                    pickUpType = 1;
-                    startPositionWatch();
-                    
-                }
-                if (NumberOfSteps % 107 == 0) {
-                    //sendSteps();
-                    Points += 100;
-                    pointsSample.push(3);
-                     // Add pickups to map
-                    pickUpType = 2;
-                    startPositionWatch();
-                    
+                if (placeMode == true) {
+                    if (NumberOfSteps % 5 == 0) {
+                        //sendSteps();
+                        Points += 1;
+                        pointsSample.push(1);
+                        // Add pickups to map
+                        pickUpType = 0;
+                        startPositionWatch();
+                        
+                    }
+                    if (NumberOfSteps % 55 == 0) {
+                        //sendSteps();
+                        Points += 50;
+                        pointsSample.push(2);
+                         // Add pickups to map
+                        pickUpType = 1;
+                        startPositionWatch();
+                        
+                    }
+                    if (NumberOfSteps % 107 == 0) {
+                        //sendSteps();
+                        Points += 100;
+                        pointsSample.push(3);
+                         // Add pickups to map
+                        pickUpType = 2;
+                        startPositionWatch();
+                        
+                    }
                 }
             } else {
                 isChange = 0;
             }
+            
             
         //after 3 seconds of no movement set step value to 0
         //

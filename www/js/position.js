@@ -2,13 +2,18 @@
     var latitude = 0;
     var longitude = 0;
     var pickUpLocations =[];
-    var p = 0;
-    var i = 0;
-    var t = 0;
-    var addPickUpsToMap;
-    var pickUpImg;
-    var map;
     var proximityArray =[];
+    //Amount to countdown from (in seconds)
+    var countDownValue = 45;
+    var p = 0;
+    var i = 0;    
+    var map;
+    // Used to define whether the game is in place mode or collect mode
+    var placeMode = true;
+    var allMarkers = [];
+    var markerLocation;
+    
+    
     
     function startPositionWatch() {
         //alert("pos 5 sec cycle");
@@ -42,6 +47,7 @@
     
     function mapInitialize() {
     //alert("map
+        startCountDown();
         if (p == 0) {
             //alert("lat: "+latitude+"long: "+longitude);
             var mapOptions = {
@@ -59,17 +65,17 @@
 
     //Add markers to the map taking them from the array created at startPositionWatch
     
-        function addPickUpsToMap(){
+        function addPickUpsToMap() {
             //alert("add markers");
             var mapBounds = new google.maps.LatLngBounds();
-        
+            
            // get location from the newest entry in the array
             //alert(pickUpLocations.length+" markers");
             if ( i < pickUpLocations.length) {
                 var markers = pickUpLocations[i];
                 var markerLatlng = new google.maps.LatLng(markers[0], markers[1]);
                 
-                //Select Marker type for map based on step parameters
+                //Select Marker type for map based on step frequency
                 if (pickUpType == 0) {
                     pickUpImg = "img/starPickUp.png";
                 }
@@ -96,6 +102,7 @@
                     animation: google.maps.Animation.DROP,
                     map: map
                 });
+                allMarkers.push(marker);
                 mapBounds.extend(markerLatlng);
             }
             i++;
@@ -103,32 +110,11 @@
             //map.fitBounds(mapBounds);
         }
         
-    }
-    
-    //Count down function
-    //
-    function startCountDown() {
-        countDownValue = 120;
-        countDownTrigger();
-    }
-    
-    function countDownTrigger() {
-        if(countDownValue > 0) {
-            countDownValue--;
-            document.getElementById('countdown').innerHTML = "Active Time Left: "+countDownValue;
-            if(countDownValue > 0) {
-                countdown = setTimeout('countDownTrigger()', 1000);
-            } else {
-                alert("Start heading back and collect your stars");
-                alert(pickUpLocations);
-                pickupProximity();
-            }
-        } 
-            
+        
         
     }
     
-    // Detect proximity of 2 sets of lat long values. Using the functions in latlon.js and geo.js 
+     // Detect proximity of 2 sets of lat long values. Using the functions in latlon.js and geo.js 
     
     function detectProximity(lat1, lon1, lat2, lon2) {
         var p1 = new LatLon(Geo.parseDMS(lat1), Geo.parseDMS(lon1));
@@ -137,22 +123,66 @@
         //alert(distance+' metres');
         return distance;
     }
-    
-    // Get proximity of pick-ups to players current position
-    
+        
+    // Start timer to check proximity at a set interval
+        
     function pickupProximity() {
-        for (var l=0; l<pickUpLocations.length; l++) {
-            var pos = pickUpLocations[l];
-            alert("positions length: "+pickUpLocations.length+" values: "+pickUpLocations+"current Pos: "+latitude+" "+longitude);
+        checkAllLocations();
+        var int = setInterval(function(){checkAllLocations()},5000);
+        alert("pick up proximity start");
+    }
+        
+    // Get proximity of pick-ups in relationship to players current position
+        
+    function checkAllLocations() {
+        proximityArray = [];
+        for (var e=0; e<pickUpLocations.length; e++) {
+            var pos = pickUpLocations[e];
+            //alert("positions length: "+pickUpLocations.length+" values: "+pickUpLocations+"current Pos: "+latitude+" "+longitude);
             var proximity = detectProximity(pos[0], pos[1], latitude, longitude);
             alert("proximity single output - "+proximity);
-            push.proximityArray(proximity);
-            alert("proximity values - "+proximityArray);
+            proximityArray.push(proximity);
+            if (proximity < 8 && pickUpLocations.length > 0) {
+                pickUpLocations.splice(e,1);
+                alert("pickup star");
+                alert("positions length: "+pickUpLocations.length);
+                removePickUps(e);
+                
+                
+            }
+           
+        }
+        alert("proximity values - "+proximityArray);
+    }
+    
+    function removePickUps(index) {
+        alert("remove marker: "+index);
+        alert("markers length"+allMarkers.length)
+        for (var i = 0; i < allMarkers.length; i++) {
+            allMarkers[i].setMap(null);
         }
     }
     
+    //Count down function
     
-    
-
+    function startCountDown() {
+        countDownTrigger();
+        //alert("countdown is commencing");
+    }
+        
+    function countDownTrigger() {
+        if(countDownValue > 0) {
+            countDownValue--;
+            document.getElementById('countdown').innerHTML = "Active Time Left: "+countDownValue;
+            if(countDownValue > 0) {
+                countdown = setTimeout('countDownTrigger()', 1000);
+            } else {
+                alert("Start heading back and collect your stars");
+                //alert(pickUpLocations);
+                pickupProximity();
+                placeMode = false;   
+            }
+        } 
+    }
     
     
