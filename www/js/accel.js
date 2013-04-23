@@ -63,9 +63,9 @@
                 TweenMax.to(disc, .1, {scale:1.3, repeat:1, yoyo:true});
                 
                 
-                // Send step value everytime value exceeds threshold (multiple of 5)
-                if (placeMode == true) {
-                    if (NumberOfSteps % 5 == 0) {
+                // Send step value everytime value exceeds threshold (multiple of a value)
+                if (placeMode) {
+                    if (NumberOfSteps % 20 == 0) {
                         //sendSteps();
                         Points += 1;
                         pointsSample.push(1);
@@ -74,7 +74,7 @@
                         startPositionWatch();
                         
                     }
-                    if (NumberOfSteps % 55 == 0) {
+                    if (NumberOfSteps % 66 == 0) {
                         //sendSteps();
                         Points += 50;
                         pointsSample.push(2);
@@ -83,7 +83,7 @@
                         startPositionWatch();
                         
                     }
-                    if (NumberOfSteps % 107 == 0) {
+                    if (NumberOfSteps % 133 == 0) {
                         //sendSteps();
                         Points += 100;
                         pointsSample.push(3);

@@ -2,9 +2,9 @@
     var latitude = 0;
     var longitude = 0;
     var pickUpLocations =[];
-    var proximityArray =[];
+    //var proximityArray =[];
     //Amount to countdown from (in seconds)
-    var countDownValue = 45;
+    var countDownValue = 300;
     var p = 0;
     var i = 0;    
     var map;
@@ -28,7 +28,7 @@
 
         latitude = position.coords.latitude;
         longitude = position.coords.longitude;
-        if (p >= 1) {
+        if (p == 1) {
             pickUpLocations.push([latitude, longitude]);
         }
         
@@ -60,7 +60,7 @@
         } else {
            addPickUpsToMap(); 
         }
-        p++;
+        p=1;
         
 
     //Add markers to the map taking them from the array created at startPositionWatch
@@ -127,40 +127,57 @@
     // Start timer to check proximity at a set interval
         
     function pickupProximity() {
-        checkAllLocations();
+        //checkAllLocations();
         var int = setInterval(function(){checkAllLocations()},5000);
-        alert("pick up proximity start");
+        p==2;
+        //alert("pick up proximity start");
     }
         
     // Get proximity of pick-ups in relationship to players current position
         
     function checkAllLocations() {
-        proximityArray = [];
+        // Get the players position before calculating their relationship to pickups
+        startPositionWatch();
+        //To store the distance from the player to all the pickups
+        var proximityArray = [];
+        var indexOfPickedUps = [];
+        alert(pickUpLocations.length+" start locations. List:"+pickUpLocations);
         for (var e=0; e<pickUpLocations.length; e++) {
             var pos = pickUpLocations[e];
             //alert("positions length: "+pickUpLocations.length+" values: "+pickUpLocations+"current Pos: "+latitude+" "+longitude);
             var proximity = detectProximity(pos[0], pos[1], latitude, longitude);
-            alert("proximity single output - "+proximity);
+            //alert("proximity single output - "+proximity);
             proximityArray.push(proximity);
-            if (proximity < 8 && pickUpLocations.length > 0) {
-                pickUpLocations.splice(e,1);
-                alert("pickup star");
-                alert("positions length: "+pickUpLocations.length);
+            pickUpLocations[e].push(proximity);
+            //alert(pickUpLocations);
+            
+            if (proximity < 15) {
+                //pickUpLocations.splice(e,1);
+                indexOfPickedUps.push(e);
+                //alert("pickup star");
+                //alert("positions length: "+pickUpLocations.length);
+                
+                // remove markers at the position in the array where the proximity is too close
                 removePickUps(e);
                 
                 
             }
            
         }
-        alert("proximity values - "+proximityArray);
+        alert(indexOfPickedUps.length);
+        //remove postion values from the array if they too close to the player
+        for (var d=0; d<indexOfPickedUps.length; d++) {
+            pickUpLocations.splice(d,1);
+        }
+        
+        
+        alert(pickUpLocations.length+" end locations. List:"+pickUpLocations);
     }
     
+    //Remove marker icons from the map
+    
     function removePickUps(index) {
-        alert("remove marker: "+index);
-        alert("markers length"+allMarkers.length)
-        for (var i = 0; i < allMarkers.length; i++) {
-            allMarkers[i].setMap(null);
-        }
+        allMarkers[index].setMap(null);
     }
     
     //Count down function
