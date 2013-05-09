@@ -65,22 +65,30 @@
                 
                 // Send step value everytime value exceeds threshold (multiple of a value)
                 if (placeMode) {
-                    if (NumberOfSteps % 20 == 0) {
+                    if (NumberOfSteps % 5 == 0) {
                         //sendSteps();
                         Points += 1;
                         pointsSample.push(1);
                         // Add pickups to map
                         pickUpType = 0;
-                        startPositionWatch();
+                        //startPositionWatch();
+                        
+                        newMarker = true;
+                        getPositionWatch();
+                        //mapInitialize();
+                        alert("add marker");
                         
                     }
-                    if (NumberOfSteps % 66 == 0) {
+                    if (NumberOfSteps % 16 == 0) {
                         //sendSteps();
                         Points += 50;
                         pointsSample.push(2);
                          // Add pickups to map
                         pickUpType = 1;
-                        startPositionWatch();
+                        
+                        newMarker = true;
+                        getPositionWatch();
+                        alert("add SUPER marker");
                         
                     }
                     if (NumberOfSteps % 133 == 0) {
@@ -89,7 +97,10 @@
                         pointsSample.push(3);
                          // Add pickups to map
                         pickUpType = 2;
-                        startPositionWatch();
+                        
+                        newMarker = true;
+                        getPositionWatch();
+                        alert("add MEGA marker");
                         
                     }
                 }

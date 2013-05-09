@@ -5,39 +5,58 @@
     //var proximityArray =[];
     //Amount to countdown from (in seconds)
     var countDownValue = 300;
-    var p = 0;
-    var i = 0;    
+    var newMarker = false;
+    var i = 0;
+    var posCalls = 0;
     var map;
     // Used to define whether the game is in place mode or collect mode
     var placeMode = true;
     var allMarkers = [];
     var markerLocation;
+    var geolocationRequests = 0;
     
     
     
     function startPositionWatch() {
-        //alert("pos 5 sec cycle");
         var options = { timeout: 10000 };
-        //watchIDPosition = navigator.geolocation.watchPosition(geolocationSuccess, onPositionError, options);
-        watchIDPosition = navigator.geolocation.getCurrentPosition(geolocationSuccess, onPositionError);
+        watchIDPosition = navigator.geolocation.watchPosition(geolocationSuccess, onPositionError, options);
+        //watchIDPosition = navigator.geolocation.getCurrentPosition(geolocationSuccess, onPositionError);
+        
     }
+    
+    function getPositionWatch() {
+        var options = { timeout: 10000 };
+        getIDPosition = navigator.geolocation.getCurrentPosition(geolocationSuccess, onPositionError, options);
         
+    }
     function geolocationSuccess(position) {
-        
-        //push lat and long to variables and array
-
+        alert("new location: "+position.coords.latitude+" "+position.coords.longitude);
         latitude = position.coords.latitude;
         longitude = position.coords.longitude;
-        if (p == 1) {
+        if (newMarker) {
             pickUpLocations.push([latitude, longitude]);
         }
-        
         mapInitialize();
-        
-        //document.getElementById('geolocation').innerHTML = "LAT: " +  position.coords.latitude + " LON: " + position.coords.longitude + " pickups:" +pickUpLocations.length/*"<br />ACC: "+ position.coords.accuracy  + " ELE: "+ position.coords.altitude  + " SPEED(KM): "+ position.coords.speed/3.6*/;
-        //placeMarkers();
-            
     }
+        
+        
+        
+    //function geolocationSuccess(position) {
+    //    
+    //    //push lat and long to variables and array
+    //
+    //    latitude = position.coords.latitude;
+    //    longitude = position.coords.longitude;
+    //    if (p == 1) {
+    //        pickUpLocations.push([latitude, longitude]);
+    //    }
+    //    
+    //    mapInitialize();
+    //    
+    //    //document.getElementById('geolocation').innerHTML = "LAT: " +  position.coords.latitude + " LON: " + position.coords.longitude + " pickups:" +pickUpLocations.length/*"<br />ACC: "+ position.coords.accuracy  + " ELE: "+ position.coords.altitude  + " SPEED(KM): "+ position.coords.speed/3.6*/;
+    //    //placeMarkers();
+    //        
+    //}
     function onPositionError(error) {
         alert('code: '    + error.code    + '\n' +
               'message: ' + error.message + '\n');
@@ -46,11 +65,16 @@
     //Render google map to screen and add pickups if this is called for a second time.
     
     function mapInitialize() {
-    //alert("map
-        startCountDown();
-        if (p == 0) {
+        
+        
+        //if this is the first init then create map otherwise add pick ups
+        if (newMarker) {
             //alert("lat: "+latitude+"long: "+longitude);
-            var mapOptions = {
+            addPickUpsToMap();
+            newMarker = false;
+        }
+        if (posCalls == 0) {
+           var mapOptions = {
                 zoom: 16,
                 center: new google.maps.LatLng(latitude, longitude),
                 disableDefaultUI: true,
@@ -58,9 +82,25 @@
             }
             map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
         } else {
-           addPickUpsToMap(); 
+            var currentIconImage = {
+                url: "img/youarehere.png",
+                // This marker is 20 pixels wide by 32 pixels tall.
+                size: new google.maps.Size(36, 36),
+                // The origin for this image is 0,0.
+                origin: new google.maps.Point(0,0),
+                // The anchor for this image is the base of the flagpole at 0,32.
+                anchor: new google.maps.Point(18, 18    )
+            };
+            
+            var currentPosMarker = new google.maps.Marker({
+                position: new google.maps.LatLng(latitude, longitude),
+                map: map,
+                icon: currentIconImage
+            });
         }
-        p=1;
+        posCalls++;
+        
+        
         
 
     //Add markers to the map taking them from the array created at startPositionWatch

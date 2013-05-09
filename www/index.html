@@ -34,13 +34,14 @@
     // Cordova is ready
     //
     function onDeviceReady() {
-        //document.getElementById('feedback').innerHTML = "device ready";
         startAccelWatch();
         //startCompassWatch();
         startPositionWatch();
-        //var map = new GoogleMap();
-        
-        
+        // Start countdown ticker
+        startCountDown();
+        //var options = { timeout: 3000 };
+        //watchIDPosition = navigator.geolocation.watchPosition(bob, onPositionError, options);
+           
     }
 
     </script>
