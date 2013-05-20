@@ -73,10 +73,10 @@
                         pickUpType = 0;
                         //startPositionWatch();
                         
-                        newMarker = true;
+                        newPickUp = true;
                         getPositionWatch();
                         //mapInitialize();
-                        alert("add marker");
+                        alert("add marker"+newPickUp);
                         
                     }
                     if (NumberOfSteps % 16 == 0) {
@@ -86,7 +86,7 @@
                          // Add pickups to map
                         pickUpType = 1;
                         
-                        newMarker = true;
+                        newPickUp = true;
                         getPositionWatch();
                         alert("add SUPER marker");
                         
@@ -98,7 +98,7 @@
                          // Add pickups to map
                         pickUpType = 2;
                         
-                        newMarker = true;
+                        newPickUp = true;
                         getPositionWatch();
                         alert("add MEGA marker");
                         

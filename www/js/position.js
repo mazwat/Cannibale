@@ -5,7 +5,7 @@
     //var proximityArray =[];
     //Amount to countdown from (in seconds)
     var countDownValue = 300;
-    var newMarker = false;
+    var newPickUp = false;
     var i = 0;
     var posCalls = 0;
     var map;
@@ -20,6 +20,7 @@
     function startPositionWatch() {
         var options = { timeout: 10000 };
         watchIDPosition = navigator.geolocation.watchPosition(geolocationSuccess, onPositionError, options);
+        alert("new position check");
         //watchIDPosition = navigator.geolocation.getCurrentPosition(geolocationSuccess, onPositionError);
         
     }
@@ -30,10 +31,10 @@
         
     }
     function geolocationSuccess(position) {
-        alert("new location: "+position.coords.latitude+" "+position.coords.longitude);
+        //alert("new location: "+position.coords.latitude+" "+position.coords.longitude);
         latitude = position.coords.latitude;
         longitude = position.coords.longitude;
-        if (newMarker) {
+        if (newPickUp) {
             pickUpLocations.push([latitude, longitude]);
         }
         mapInitialize();
@@ -68,10 +69,10 @@
         
         
         //if this is the first init then create map otherwise add pick ups
-        if (newMarker) {
-            //alert("lat: "+latitude+"long: "+longitude);
+        if (newPickUp == true) {
+            //alert("go pickUps");
             addPickUpsToMap();
-            newMarker = false;
+            newPickUp = false;
         }
         if (posCalls == 0) {
            var mapOptions = {
@@ -81,7 +82,6 @@
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             }
             map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
-        } else {
             var currentIconImage = {
                 url: "img/youarehere.png",
                 // This marker is 20 pixels wide by 32 pixels tall.
@@ -97,12 +97,22 @@
                 map: map,
                 icon: currentIconImage
             });
+        } else {
+           moveMarker( map, currentPosMarker ); 
         }
         posCalls++;
         
-        
-        
 
+    
+    //move current position marker around the map when a new position is detected.
+    
+        function moveMarker( map, currentMarker ) {
+    
+            currentMarker.setPosition( new google.maps.LatLng( latitude, longitude ) );
+            //map.panTo( new google.maps.LatLng( 0, 0 ) );
+        
+        }
+        
     //Add markers to the map taking them from the array created at startPositionWatch
     
         function addPickUpsToMap() {
@@ -115,7 +125,7 @@
                 var markers = pickUpLocations[i];
                 var markerLatlng = new google.maps.LatLng(markers[0], markers[1]);
                 
-                //Select Marker type for map based on step frequency
+                //Select pick-up icon image, based on step frequency
                 if (pickUpType == 0) {
                     pickUpImg = "img/starPickUp.png";
                 }
@@ -128,13 +138,15 @@
                 
                 var image = {
                     url: pickUpImg,
-                    // This marker is 20 pixels wide by 32 pixels tall.
+                    // This marker is 35 pixels wide by 35 pixels tall.
                     size: new google.maps.Size(35, 35),
                     // The origin for this image is 0,0.
                     origin: new google.maps.Point(0,0),
-                    // The anchor for this image is the base of the flagpole at 0,32.
+                    // The anchor for this image is at the bottom and in the centre.
                     anchor: new google.maps.Point(0, 17)
                 };
+                
+                //Place pick-up on the Map
                 
                 marker = new google.maps.Marker({
                     position: markerLatlng,
@@ -142,8 +154,10 @@
                     animation: google.maps.Animation.DROP,
                     map: map
                 });
-                allMarkers.push(marker);
+                
                 mapBounds.extend(markerLatlng);
+                
+                allMarkers.push(marker);
             }
             i++;
             
